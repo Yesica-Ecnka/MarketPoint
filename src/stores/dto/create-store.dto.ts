@@ -5,6 +5,8 @@ export class CreateStoreDto {
   @MinLength(3, { message: 'El nombre de la tienda debe tener al menos 3 letras' })
   name: string;
 
+
+  
   @IsOptional()
   @IsString()
   address?: string;
@@ -13,3 +15,6 @@ export class CreateStoreDto {
   @IsBoolean()
   isActive?: boolean;
 }
+
+
+
