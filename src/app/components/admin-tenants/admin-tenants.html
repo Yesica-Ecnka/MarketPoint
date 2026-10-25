@@ -1,0 +1,44 @@
+<div style="max-width: 900px; margin: 40px auto; font-family: sans-serif;">
+  <h2 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0;">Gestión de Inquilinos (Tenants)</h2>
+  <p style="color: #7f8c8d; margin-bottom: 25px;">Suspende o activa tiendas. Al suspender, se ocultarán todos los productos de esa tienda del catálogo público.</p>
+
+  <div *ngIf="cargando" style="text-align: center; padding: 20px; color: #7f8c8d;">
+    Cargando tiendas...
+  </div>
+
+  <table *ngIf="!cargando && tiendas.length > 0" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden;">
+    <thead style="background-color: #f8f9fa;">
+      <tr>
+        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #ddd; color: #2c3e50;">Tienda</th>
+        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #ddd; color: #2c3e50;">Correos Asociados</th>
+        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #ddd; color: #2c3e50;">Estado Mensualidad</th>
+        <th style="padding: 15px; text-align: right; border-bottom: 2px solid #ddd; color: #2c3e50;">Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tienda of tiendas" style="border-bottom: 1px solid #eee;">
+        <td style="padding: 15px; font-weight: bold; color: #34495e;">Tienda #{{ tienda.storeId }}</td>
+        <td style="padding: 15px; color: #7f8c8d;">
+          <!-- Mostramos todos los correos vinculados a esta tienda -->
+          <div *ngFor="let email of tienda.emails" style="margin-bottom: 4px;">{{ email }}</div>
+        </td>
+        <td style="padding: 15px; text-align: center;">
+          <span [ngStyle]="{'background': tienda.isActive ? '#e8f5e9' : '#ffebee', 'color': tienda.isActive ? '#2e7d32' : '#c62828'}" style="padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;">
+            {{ tienda.isActive ? 'Activo' : 'Suspendido' }}
+          </span>
+        </td>
+        <td style="padding: 15px; text-align: right;">
+          <button (click)="cambiarEstado(tienda)" 
+                  [ngStyle]="{'background': tienda.isActive ? '#e74c3c' : '#27ae60'}" 
+                  style="color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: opacity 0.2s;">
+            {{ tienda.isActive ? 'Suspender Tienda' : 'Activar Tienda' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!cargando && tiendas.length === 0" style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; color: #7f8c8d;">
+    No hay tiendas registradas en el sistema.
+  </div>
+</div>

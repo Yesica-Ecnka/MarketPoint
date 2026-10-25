@@ -1,0 +1,98 @@
+<div style="max-width: 800px; margin: 40px auto; font-family: sans-serif;">
+  <h2 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;">Mi Carrito de Compras</h2>
+
+  <div *ngIf="mensaje" [ngStyle]="{'background': mensaje.includes('exitoso') ? '#e8f5e9' : '#ffebee', 'color': mensaje.includes('exitoso') ? '#2e7d32' : '#c62828'}" style="padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; text-align: center;">
+    {{ mensaje }}
+  </div>
+
+  <div *ngIf="itemsCarrito.length > 0; else carritoVacio">
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+      <thead>
+        <tr style="background-color: #f8f9fa; text-align: left;">
+          <th style="padding: 12px; border-bottom: 2px solid #ddd;">Producto</th>
+          <th style="padding: 12px; border-bottom: 2px solid #ddd;">Precio</th>
+          <th style="padding: 12px; border-bottom: 2px solid #ddd; text-align: center;">Cantidad</th>
+          <th style="padding: 12px; border-bottom: 2px solid #ddd;">Subtotal</th>
+          <th style="padding: 12px; border-bottom: 2px solid #ddd; text-align: center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of itemsCarrito" style="border-bottom: 1px solid #eee;">
+          <td style="padding: 12px;">{{ item.name }}</td>
+          <td style="padding: 12px;">Q{{ item.price | number:'1.2-2' }}</td>
+          
+          <!-- Controles de Cantidad -->
+          <td style="padding: 12px; text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+              <button (click)="reducirCantidad(item)" style="background: #e0e0e0; color: #333; border: none; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-weight: bold; transition: background 0.2s;">-</button>
+              <span style="font-weight: bold; min-width: 20px; display: inline-block;">{{ item.quantity }}</span>
+              <button (click)="aumentarCantidad(item)" style="background: #e0e0e0; color: #333; border: none; border-radius: 4px; width: 28px; height: 28px; cursor: pointer; font-weight: bold; transition: background 0.2s;">+</button>
+            </div>
+          </td>
+          
+          <td style="padding: 12px; font-weight: bold;">Q{{ (item.price * item.quantity) | number:'1.2-2' }}</td>
+          
+          <!-- Botón Eliminar -->
+          <td style="padding: 12px; text-align: center;">
+            <button (click)="eliminarProducto(item)" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: background 0.3s;">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- SECCIÓN DE RECOMPENSAS -->
+    <div *ngIf="usuarioLogueado && puntosDisponibles >= 10" style="background: #e8f5e9; padding: 20px; border-radius: 8px; border: 1px solid #c8e6c9; margin-bottom: 20px;">
+      <h4 style="color: #2e7d32; margin-top: 0; margin-bottom: 10px;">🎁 Usar Puntos de Recompensa</h4>
+      
+      <p style="margin: 0 0 5px 0; font-size: 0.95rem; color: #1b5e20;">
+        <strong>Regla de canje:</strong> Cada <strong>10 puntos</strong> equivalen a <strong>Q1.00 de descuento</strong> en tu compra.
+      </p>
+      
+      <p style="margin: 0 0 15px 0; font-size: 0.9rem; color: #388e3c;">
+        Tienes <strong>{{ puntosDisponibles }} puntos</strong> disponibles. Puedes usarlos en múltiplos de 10.
+      </p>
+      
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <label for="puntosInput" style="font-weight: bold; color: #1b5e20;">Puntos a usar:</label>
+        <input id="puntosInput" type="number" [(ngModel)]="puntosAUsar" (ngModelChange)="actualizarDescuento()" [max]="puntosDisponibles" min="0" step="10"
+               style="padding: 10px; border: 1px solid #ccc; border-radius: 6px; width: 120px; font-size: 1rem;">
+        <span style="color: #d35400; font-weight: bold; font-size: 1.1rem;">- Q{{ descuento | number:'1.2-2' }} de descuento</span>
+      </div>
+    </div>
+
+    <!-- RESUMEN DE TOTALES -->
+    <div style="text-align: right; font-size: 1.1rem; margin-bottom: 5px; color: #7f8c8d;">
+      Subtotal: Q{{ subtotal | number:'1.2-2' }}
+    </div>
+    <div *ngIf="descuento > 0" style="text-align: right; font-size: 1.1rem; margin-bottom: 5px; color: #27ae60;">
+      Descuento aplicado: - Q{{ descuento | number:'1.2-2' }}
+    </div>
+    <div style="text-align: right; font-size: 1.4rem; margin-bottom: 25px;">
+      Total a Pagar: <span style="font-weight: bold; color: #2c3e50;">Q{{ total | number:'1.2-2' }}</span>
+    </div>
+
+    <!-- FORMULARIO INVITADO -->
+    <div *ngIf="mostrarFormularioInvitado && !usuarioLogueado" style="background: #fdfbf7; padding: 20px; border-radius: 8px; border: 1px solid #e3e0d8; margin-bottom: 20px; text-align: left;">
+      <h4 style="color: #d35400; margin-top: 0; margin-bottom: 10px;">Finalizar compra como Invitado</h4>
+      <p style="margin: 0 0 15px 0; font-size: 0.9rem; color: #7f8c8d;">Ingresa tu correo para enviarte la confirmación del pedido y el número de seguimiento.</p>
+      <input type="email" [(ngModel)]="guestEmail" placeholder="tu@correo.com" required
+             style="width: 100%; max-width: 400px; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+    </div>
+
+    <div style="text-align: right;">
+      <button (click)="iniciarPago()" [disabled]="procesando"
+              style="padding: 14px 30px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: background 0.3s;">
+        {{ procesando ? 'Procesando...' : (mostrarFormularioInvitado || usuarioLogueado ? 'Confirmar Pago Seguro' : 'Pagar Ahora') }}
+      </button>
+    </div>
+  </div>
+
+  <ng-template #carritoVacio>
+    <div *ngIf="!mensaje.includes('exitoso')" style="text-align: center; padding: 40px; color: #7f8c8d; background: #f8f9fa; border-radius: 8px;">
+      <h3>Tu carrito está vacío</h3>
+      <a routerLink="/catalogo" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Ir al Catálogo</a>
+    </div>
+  </ng-template>
+</div>

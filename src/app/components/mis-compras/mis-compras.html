@@ -1,0 +1,37 @@
+<div style="max-width: 800px; margin: 40px auto; font-family: sans-serif;">
+  <h2 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0;">Mi Historial de Compras y Recompensas</h2>
+  
+  <!-- Tarjeta del Programa de Recompensas -->
+  <div style="background: #e8f5e9; border: 1px solid #c8e6c9; color: #2e7d32; padding: 20px; border-radius: 8px; margin-top: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+    <div>
+      <h3 style="margin: 0 0 5px 0; font-size: 1.1rem; color: #1b5e20;">🎁 Programa de Fidelización MarketPoint</h3>
+      <p style="margin: 0; font-size: 0.9rem; color: #388e3c;">Acumulas puntos automáticamente con cada compra realizada desde tu cuenta.</p>
+    </div>
+    <div style="text-align: right;">
+      <span style="font-size: 0.8rem; display: block; color: #2e7d32; font-weight: bold;">Tus Puntos:</span>
+      <span style="font-size: 1.5rem; background: #2e7d32; color: white; padding: 6px 16px; border-radius: 20px; font-weight: bold; display: inline-block; margin-top: 4px;">
+        {{ cargandoPuntos ? '...' : puntosRecompensa }} pts
+      </span>
+    </div>
+  </div>
+  
+  <div *ngIf="cargando" style="text-align: center; padding: 20px; color: #7f8c8d;">
+    Cargando tus órdenes...
+  </div>
+
+  <div *ngIf="!cargando && compras.length === 0" style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; color: #7f8c8d;">
+    Aún no has realizado ninguna compra.
+  </div>
+
+  <div *ngIf="!cargando && compras.length > 0">
+    <div *ngFor="let compra of compras" style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 15px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
+        <span style="font-weight: bold; color: #2c3e50;">Orden #{{ compra.id }}</span>
+        <span style="color: #7f8c8d;">{{ compra.createdAt | date:'medium' }}</span>
+      </div>
+      
+      <p style="margin: 5px 0;"><strong>Estado:</strong> <span style="color: #27ae60; font-weight: bold;">{{ compra.status }}</span></p>
+      <p style="margin: 5px 0; font-size: 1.1rem;"><strong>Total Pagado:</strong> <span style="color: #2c3e50; font-weight: bold;">${{ compra.total | number:'1.2-2' }}</span></p>
+    </div>
+  </div>
+</div>

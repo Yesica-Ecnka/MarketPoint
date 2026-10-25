@@ -1,0 +1,104 @@
+<div style="max-width: 1200px; margin: 40px auto; font-family: sans-serif;">
+  <h2 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 25px;">Dashboard del Vendedor</h2>
+  
+  <div *ngIf="cargando" style="text-align: center; padding: 20px; color: #7f8c8d;">
+    Cargando panel de control...
+  </div>
+
+  <div *ngIf="!cargando">
+    
+    <!-- Barra de Filtros -->
+    <div style="background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+      <div style="font-weight: bold; color: #2c3e50;">Filtros:</div>
+      
+      <input type="date" [(ngModel)]="filtroFecha" (change)="aplicarFiltros()" 
+             style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; outline: none;">
+             
+      <select [(ngModel)]="filtroProducto" (change)="aplicarFiltros()" 
+              style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 200px; outline: none;">
+        <option value="">Todos los productos</option>
+        <option *ngFor="let prod of productosUnicos" [value]="prod">{{ prod }}</option>
+      </select>
+
+      <button (click)="limpiarFiltros()" 
+              style="padding: 8px 15px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+        Limpiar
+      </button>
+    </div>
+
+    <!-- Tarjetas de Métricas -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+      <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #27ae60;">
+        <h4 style="margin: 0 0 10px 0; color: #7f8c8d; text-transform: uppercase; font-size: 0.85rem;">Ingresos Filtrados</h4>
+        <div style="font-size: 2rem; font-weight: bold; color: #2c3e50;">Q{{ totalIngresos | number:'1.2-2' }}</div>
+      </div>
+      <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #2980b9;">
+        <h4 style="margin: 0 0 10px 0; color: #7f8c8d; text-transform: uppercase; font-size: 0.85rem;">Ventas este Mes</h4>
+        <div style="font-size: 2rem; font-weight: bold; color: #2c3e50;">Q{{ ventasMes | number:'1.2-2' }}</div>
+      </div>
+      <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #8e44ad;">
+        <h4 style="margin: 0 0 10px 0; color: #7f8c8d; text-transform: uppercase; font-size: 0.85rem;">Órdenes de Hoy</h4>
+        <div style="font-size: 2rem; font-weight: bold; color: #2c3e50;">{{ ordenesHoy }}</div>
+      </div>
+    </div>
+
+    <!-- Layout Dividido: Gráfica y Stock -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; align-items: start;">
+      
+      <!-- Gráfica Interactiva -->
+      <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <canvas id="productosChart" style="max-height: 300px; width: 100%;"></canvas>
+        <div *ngIf="ordenesFiltradas.length === 0" style="text-align: center; color: #999; padding: 20px;">
+          No hay ventas para los filtros seleccionados.
+        </div>
+      </div>
+
+      <!-- Panel de Niveles de Stock -->
+      <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 340px; overflow-y: auto;">
+        <h3 style="margin: 0 0 15px 0; color: #34495e; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px;">Inventario Actual</h3>
+        
+        <div *ngFor="let p of productosStock" style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f9f9f9;">
+          <span style="color: #2c3e50; font-size: 0.95rem;">
+            <!-- ID del producto añadido aquí -->
+            <span style="color: #95a5a6; font-weight: bold; margin-right: 5px; font-size: 0.85rem;">#{{ p.id }}</span>
+            {{ p.name }}
+          </span>
+          <span [ngStyle]="{'color': p.stock < 10 ? '#e74c3c' : '#27ae60', 'font-weight': 'bold'}">
+            {{ p.stock }} und.
+          </span>
+        </div>
+        
+        <div *ngIf="productosStock.length === 0" style="color: #999; font-size: 0.9rem; text-align: center;">
+          No hay productos en inventario.
+        </div>
+      </div>
+    </div> <!-- Cierre correcto del grid -->
+
+    <!-- Tabla Detallada -->
+    <h3 style="color: #34495e; margin-bottom: 15px;">Detalle de Transacciones</h3>
+    <table style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+      <thead>
+        <tr style="background-color: #2c3e50; color: white; text-align: left;">
+          <th style="padding: 12px;">No. Orden</th>
+          <th style="padding: 12px;">Fecha</th>
+          <th style="padding: 12px;">Cliente ID</th>
+          <th style="padding: 12px;">Total</th>
+          <th style="padding: 12px;">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let orden of ordenesFiltradas" style="border-bottom: 1px solid #eee;">
+          <td style="padding: 12px; font-weight: bold;">#{{ orden.id }}</td>
+          <td style="padding: 12px;">{{ orden.createdAt | date:'short' }}</td>
+          <td style="padding: 12px;">{{ orden.userId }}</td>
+          <td style="padding: 12px; font-weight: bold; color: #27ae60;">Q{{ orden.total | number:'1.2-2' }}</td>
+          <td style="padding: 12px;">
+            <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">
+              {{ orden.status }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

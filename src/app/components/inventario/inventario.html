@@ -1,0 +1,253 @@
+<div style="max-width: 1400px; margin: 30px auto; font-family: sans-serif; padding: 0 20px;">
+  <h2 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 25px;">Gestión de Inventario</h2>
+
+  <div style="display: grid; grid-template-columns: 380px 1fr; gap: 30px; align-items: start;">
+    
+    <!-- COLUMNA IZQUIERDA -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <!-- Panel de Producto -->
+      <div style="padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); background: white;">
+        <h3 style="margin-top: 0; color: #34495e; font-size: 1.2rem;">
+          {{ productoEnEdicion ? 'Editar Producto #' + productoEnEdicion.id : 'Agregar Nuevo Producto' }}
+        </h3>
+        
+        <div *ngIf="mensajeExito" style="background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-weight: bold; font-size: 0.9rem;">
+          {{ mensajeExito }}
+        </div>
+        <div *ngIf="mensajeError" style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;">
+          {{ mensajeError }}
+        </div>
+
+        <form [formGroup]="productoForm" (ngSubmit)="onSubmit()" style="display: flex; flex-direction: column; gap: 15px;">
+          <div>
+            <label style="font-size: 0.9rem; font-weight: bold;">Nombre del Producto:</label>
+            <input type="text" formControlName="name" 
+                   [readonly]="productoEnEdicion"
+                   [ngStyle]="{'background-color': productoEnEdicion ? '#f0f0f0' : 'white', 'cursor': productoEnEdicion ? 'not-allowed' : 'text'}"
+                   style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+          </div>
+          
+          <div>
+            <label style="font-size: 0.9rem; font-weight: bold;">Categoría:</label>
+            <select formControlName="category" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; background: white;">
+              <option value="" disabled>Seleccione una categoría</option>
+              <option *ngFor="let cat of categoriasActivas" [value]="cat.name">{{ cat.name }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size: 0.9rem; font-weight: bold;">Descripción:</label>
+            <textarea formControlName="description" rows="3" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;"></textarea>
+          </div>
+          
+          <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;">
+              <label style="font-size: 0.9rem; font-weight: bold;">Precio (Q):</label>
+              <input type="number" formControlName="price" step="0.01" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+            </div>
+            <div style="flex: 1;">
+              <label style="font-size: 0.9rem; font-weight: bold;">Stock Disp:</label>
+              <input type="number" formControlName="stock" 
+                     [readonly]="productoEnEdicion"
+                     [ngStyle]="{'background-color': productoEnEdicion ? '#f0f0f0' : 'white', 'cursor': productoEnEdicion ? 'not-allowed' : 'text'}"
+                     style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+            </div>
+          </div>
+          
+          <div *ngIf="productoEnEdicion" style="margin-top: 5px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 6px;">
+            <h4 style="margin: 0 0 10px 0; color: #856404; font-size: 0.95rem;">Ajuste de Inventario</h4>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 10px; font-size: 0.85rem; color: #856404;">
+              <label style="cursor: pointer;">
+                <input type="radio" [(ngModel)]="tipoMovimiento" [ngModelOptions]="{standalone: true}" value="add"> ⬆️ Ingreso
+              </label>
+              <label style="cursor: pointer;">
+                <input type="radio" [(ngModel)]="tipoMovimiento" [ngModelOptions]="{standalone: true}" value="subtract"> ⬇️ Retiro
+              </label>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <input type="number" [(ngModel)]="cantidadTraslado" [ngModelOptions]="{standalone: true}" placeholder="Cantidad..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+              <input type="text" [(ngModel)]="motivoTraslado" [ngModelOptions]="{standalone: true}" placeholder="Motivo (Ej. Dañado, Encontrado)" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            
+            <button type="button" (click)="trasladarStock()" style="margin-top: 10px; width: 100%; padding: 8px; background-color: #d39e00; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
+              Ejecutar Movimiento
+            </button>
+          </div>
+
+          <div *ngIf="productoEnEdicion" style="margin-top: 10px; border: 1px solid #eee; border-radius: 6px; overflow: hidden;">
+            <div style="background: #f8f9fa; padding: 10px; font-weight: bold; font-size: 0.85rem; color: #2c3e50; border-bottom: 1px solid #eee;">
+              Kardex de este producto
+            </div>
+            <div *ngIf="cargandoKardex" style="padding: 10px; text-align: center; font-size: 0.8rem; color: #7f8c8d;">Cargando...</div>
+            
+            <div *ngIf="!cargandoKardex" style="max-height: 150px; overflow-y: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem;">
+                <tbody>
+                  <tr *ngFor="let mov of movimientosKardex" style="border-bottom: 1px solid #f1f2f6;">
+                    <td style="padding: 6px; color: #7f8c8d;">{{ mov.createdAt | date:'dd/MM HH:mm' }}</td>
+                    <td style="padding: 6px; font-weight: bold;" [ngStyle]="{'color': mov.type === 'IN' ? '#27ae60' : (mov.type === 'OUT' ? '#c62828' : '#2980b9')}">
+                      <ng-container *ngIf="mov.type === 'PRICE'">PRECIO</ng-container>
+                      <ng-container *ngIf="mov.type === 'IN'">+{{ mov.quantity }}</ng-container>
+                      <ng-container *ngIf="mov.type === 'OUT'">-{{ mov.quantity }}</ng-container>
+                    </td>
+                    <td style="padding: 6px; color: #34495e;">{{ mov.reason }}</td>
+                  </tr>
+                  <tr *ngIf="movimientosKardex.length === 0">
+                    <td colspan="3" style="padding: 10px; text-align: center; color: #7f8c8d;">Sin movimientos.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button type="submit" style="flex: 1; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+              {{ productoEnEdicion ? 'Actualizar Detalles' : 'Guardar Producto' }}
+            </button>
+            <button *ngIf="productoEnEdicion" type="button" (click)="cancelarEdicion()" style="flex: 1; padding: 12px; background-color: #95a5a6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Panel de Administración de Categorías - Solo visible para Super Admin -->
+      <div *ngIf="isSuperAdmin" style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 12px; background: #f8f9fa; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <h3 style="margin-top: 0; color: #34495e; font-size: 1.1rem;">Gestión de Categorías</h3>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <input type="text" [(ngModel)]="nuevaCategoria" placeholder="Nueva categoría..." style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem;">
+          <button (click)="agregarCategoria()" style="padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">Agregar</button>
+        </div>
+
+        <div style="max-height: 200px; overflow-y: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+            <tbody>
+              <tr *ngFor="let cat of categoriasCatalogo" style="border-bottom: 1px solid #eee;" [ngStyle]="{'opacity': cat.isActive ? '1' : '0.5'}">
+                <td style="padding: 8px; font-weight: bold; color: #2c3e50;">{{ cat.name }}</td>
+                <td style="padding: 8px; text-align: right;">
+                  <button (click)="cambiarEstadoCategoria(cat.id)" [ngStyle]="{'background': cat.isActive ? '#e74c3c' : '#27ae60', 'color': 'white', 'border': 'none', 'padding': '4px 8px', 'border-radius': '4px', 'cursor': 'pointer'}">
+                    {{ cat.isActive ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA -->
+    <div style="display: flex; flex-direction: column; gap: 30px;">
+      
+      <!-- Catálogo General -->
+      <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
+        <div style="padding: 15px 20px; background-color: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+          <h3 style="margin: 0; color: #34495e; font-size: 1.1rem;">Catálogo General</h3>
+          
+          <div style="display: flex; gap: 10px; max-width: 450px; justify-content: flex-end;">
+            <input type="text" [(ngModel)]="terminoBusqueda" placeholder="🔍 Buscar nombre..." style="width: 200px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            <select [(ngModel)]="categoriaFiltro" style="width: 150px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+              <option *ngFor="let cat of categoriasDisponibles" [value]="cat">{{ cat }}</option>
+            </select>
+          </div>
+        </div>
+        
+        <div *ngIf="cargando" style="padding: 30px; text-align: center; color: #7f8c8d;">Cargando inventario...</div>
+        
+        <div *ngIf="!cargando && productos.length > 0" style="max-height: 400px; overflow-y: auto;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead style="position: sticky; top: 0; background: #2c3e50; color: white; z-index: 10;">
+              <tr style="text-align: left;">
+                <th style="padding: 10px 15px; font-size: 0.85rem;">ID</th>
+                <th style="padding: 10px 15px; font-size: 0.85rem;">Tienda</th>
+                <th style="padding: 10px 15px; font-size: 0.85rem;">Producto</th>
+                <th style="padding: 10px 15px; font-size: 0.85rem;">Precio</th>
+                <th style="padding: 10px 15px; font-size: 0.85rem;">Stock</th>
+                <th style="padding: 10px 15px; font-size: 0.85rem;">Estado</th>
+                <th style="padding: 10px 15px; font-size: 0.85rem; text-align: center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of productosFiltrados" style="border-bottom: 1px solid #eee;" [ngStyle]="{'opacity': p.isActive ? '1' : '0.6', 'background': p.isActive ? 'white' : '#f9f9f9'}">
+                <td style="padding: 10px 15px; color: #95a5a6; font-weight: bold; font-size: 0.85rem;">#{{ p.id }}</td>
+                <!-- Columna de Tienda / Tenant -->
+                <td style="padding: 10px 15px; font-weight: bold; color: #8e44ad; font-size: 0.85rem;">Tienda #{{ p.storeId }}</td>
+                
+                <td style="padding: 10px 15px;">
+                  <div style="font-weight: bold; color: #2c3e50; font-size: 0.9rem;">{{ p.name }}</div>
+                  <div style="font-size: 0.75rem; color: #7f8c8d; margin-top: 2px;">{{ p.category }}</div>
+                </td>
+                <td style="padding: 10px 15px; font-weight: bold; color: #27ae60; font-size: 0.9rem;">Q{{ p.price | number:'1.2-2' }}</td>
+                <td style="padding: 10px 15px;">
+                  <span [ngStyle]="{'background': p.stock < 10 ? '#ffebee' : '#e8f5e9', 'color': p.stock < 10 ? '#c62828' : '#2e7d32', 'padding': '3px 6px', 'border-radius': '4px', 'font-weight': 'bold', 'font-size': '0.8rem'}">
+                    {{ p.stock }}
+                  </span>
+                </td>
+                <td style="padding: 10px 15px;">
+                  <span [ngStyle]="{'background': p.isActive ? '#e8f5e9' : '#ffebee', 'color': p.isActive ? '#2e7d32' : '#c62828', 'padding': '3px 6px', 'border-radius': '4px', 'font-size': '0.75rem', 'font-weight': 'bold'}">
+                    {{ p.isActive ? 'A la venta' : 'Retirado' }}
+                  </span>
+                </td>
+                <td style="padding: 10px 15px; text-align: center;">
+                  <button (click)="editarProducto(p)" style="background: #3498db; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 0.75rem;">Editar</button>
+                  <button (click)="cambiarEstado(p.id)" [ngStyle]="{'background': p.isActive ? '#e74c3c' : '#27ae60', 'color': 'white', 'border': 'none', 'padding': '4px 8px', 'border-radius': '4px', 'cursor': 'pointer', 'font-size': '0.75rem'}">
+                    {{ p.isActive ? 'Retirar' : 'Reactivar' }}
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="!cargando && productosFiltrados.length === 0 && productos.length > 0">
+                <td colspan="7" style="padding: 20px; text-align: center; color: #7f8c8d;">No hay productos que coincidan con tu búsqueda.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Registro Global de Movimientos -->
+      <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden;">
+        <div style="padding: 15px 20px; background-color: #e3f2fd; border-bottom: 1px solid #bbdefb;">
+          <h3 style="margin: 0; color: #1565c0; font-size: 1.1rem;">Registro Global de Movimientos y Cambios</h3>
+        </div>
+        
+        <div *ngIf="movimientosGlobales.length === 0" style="padding: 20px; text-align: center; color: #7f8c8d;">
+          No hay registros de mermas o ajustes.
+        </div>
+
+        <div *ngIf="movimientosGlobales.length > 0" style="max-height: 350px; overflow-y: auto;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead style="position: sticky; top: 0; background: #f8f9fa; color: #2c3e50; z-index: 5;">
+              <tr style="text-align: left; border-bottom: 2px solid #eee;">
+                <th style="padding: 10px 15px; font-size: 0.85rem;">Fecha</th>
+                <th style="padding: 10px 15px; font-size: 0.85rem;">Producto</th>
+                <th style="padding: 10px 15px; font-size: 0.85rem;">Tipo</th>
+                <th style="padding: 10px 15px; font-size: 0.85rem;">Cant.</th>
+                <th style="padding: 10px 15px; font-size: 0.85rem;">Motivo / Cambio</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let mov of movimientosGlobales" style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px 15px; color: #7f8c8d; font-size: 0.85rem;">{{ mov.createdAt | date:'short' }}</td>
+                <td style="padding: 10px 15px; font-weight: bold; color: #2c3e50; font-size: 0.85rem;">{{ mov.productName }} <span style="color: #95a5a6; font-size: 0.75rem;">(#{{ mov.productId }})</span></td>
+                <td style="padding: 10px 15px;">
+                  <span [ngStyle]="{'background': mov.type === 'IN' ? '#e8f5e9' : (mov.type === 'OUT' ? '#ffebee' : '#e3f2fd'), 'color': mov.type === 'IN' ? '#2e7d32' : (mov.type === 'OUT' ? '#c62828' : '#1565c0'), 'padding': '3px 6px', 'border-radius': '4px', 'font-size': '0.75rem', 'font-weight': 'bold'}">
+                    {{ mov.type === 'IN' ? 'ENTRADA' : (mov.type === 'OUT' ? 'SALIDA' : 'PRECIO') }}
+                  </span>
+                </td>
+                <td style="padding: 10px 15px; font-weight: bold; font-size: 0.85rem; color: #34495e;">
+                  {{ mov.type === 'PRICE' ? '-' : mov.quantity + ' und.' }}
+                </td>
+                <td style="padding: 10px 15px; font-weight: bold; font-size: 0.85rem;" [ngStyle]="{'color': mov.type === 'PRICE' ? '#2980b9' : '#e67e22'}">
+                  {{ mov.reason }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div> 
+  </div>
+</div>

@@ -1,0 +1,216 @@
+<!-- Botones de Navegación Flotantes -->
+<div style="position: fixed; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;">
+  <button (click)="scrollTo('panel-crear')" style="background-color: #8e44ad; color: white; border: none; padding: 10px 15px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-weight: bold; font-size: 0.85rem; transition: transform 0.2s;">
+    ⬆️ Crear Entidades
+  </button>
+  <button (click)="scrollTo('panel-accesos')" style="background-color: #2c3e50; color: white; border: none; padding: 10px 15px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-weight: bold; font-size: 0.85rem; transition: transform 0.2s;">
+    👥 Control de Accesos
+  </button>
+  <button (click)="scrollTo('panel-prospectos')" style="background-color: #e67e22; color: white; border: none; padding: 10px 15px; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-weight: bold; font-size: 0.85rem; transition: transform 0.2s;">
+    📝 Prospectos
+  </button>
+</div>
+
+<div id="panel-crear" style="max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+  <h2 style="color: #8e44ad; border-bottom: 2px solid #f39c12; padding-bottom: 10px; margin-top: 0;">
+    Panel del Súper Administrador
+  </h2>
+  
+  <div *ngIf="mensajeExito" style="background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: bold;">
+    {{ mensajeExito }}
+  </div>
+  <div *ngIf="mensajeError" style="background: #ffebee; color: #c62828; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: bold;">
+    {{ mensajeError }}
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+    
+    <!-- PANEL IZQUIERDO: NUEVA EMPRESA + ADMIN -->
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #eee;">
+      <h3 style="margin-top: 0; color: #2c3e50; font-size: 1.1rem; border-bottom: 1px solid #ccc; padding-bottom: 10px;">Crear Nueva Empresa + Admin</h3>
+      <form (ngSubmit)="registrarNuevoTenant()" #tenantForm="ngForm">
+        
+        <label style="font-weight: bold; font-size: 0.85rem; color: #555;">Nombre Empresa:</label>
+        <input type="text" placeholder="Ej: TechStore" name="storeName" [(ngModel)]="nuevaTienda.name" required minlength="3"
+               style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+        
+        <label style="font-weight: bold; font-size: 0.85rem; color: #555;">Dirección Empresa:</label>
+        <input type="text" placeholder="Dirección" name="storeAddress" [(ngModel)]="nuevaTienda.address"
+               style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+        
+        <label style="font-weight: bold; font-size: 0.85rem; color: #555;">Correo Administrador:</label>
+        <input type="email" placeholder="admin@empresa.com" name="userEmail" [(ngModel)]="nuevoUsuario.email" required
+               style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+        
+        <label style="font-weight: bold; font-size: 0.85rem; color: #555;">Contraseña:</label>
+        <input type="password" placeholder="Contraseña temporal" name="userPassword" [(ngModel)]="nuevoUsuario.password" required minlength="6"
+               style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+        
+        <button type="submit" [disabled]="tenantForm.invalid"
+                style="width: 100%; padding: 12px; background-color: #8e44ad; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+          Registrar Empresa y Usuario
+        </button>
+      </form>
+    </div>
+
+    <!-- PANEL DERECHO: AGREGAR USUARIO A EMPRESA EXISTENTE -->
+    <div style="background: #fdfbf7; padding: 20px; border-radius: 8px; border: 1px solid #e3e0d8;">
+      <h3 style="margin-top: 0; color: #d35400; font-size: 1.1rem; border-bottom: 1px solid #e3e0d8; padding-bottom: 10px;">Asignar Usuario a Empresa Existente</h3>
+      <form (ngSubmit)="registrarUsuarioIndependiente()" #userForm="ngForm">
+        
+        <label style="font-weight: bold; font-size: 0.85rem; color: #555;">Correo Usuario:</label>
+        <input type="email" placeholder="usuario@correo.com" name="indEmail" [(ngModel)]="nuevoUsuarioIndependiente.email" required
+               style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+        
+        <label style="font-weight: bold; font-size: 0.85rem; color: #555;">Contraseña:</label>
+        <input type="password" placeholder="Contraseña temporal" name="indPassword" [(ngModel)]="nuevoUsuarioIndependiente.password" required minlength="6"
+               style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+        
+        <label style="font-weight: bold; font-size: 0.85rem; color: #555;">Empresa / Tienda:</label>
+        <select name="indStoreId" [(ngModel)]="nuevoUsuarioIndependiente.storeId" required
+                style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; background: white;">
+          <option value="" disabled>-- Selecciona una Tienda --</option>
+          <option value="0">Global (Sin Tienda)</option>
+          <option *ngFor="let t of tiendas" [value]="t.id">{{ t.name }} (ID: {{ t.id }})</option>
+        </select>
+
+        <label style="font-weight: bold; font-size: 0.85rem; color: #555;">Rol (Permisos):</label>
+        <select name="indRole" [(ngModel)]="nuevoUsuarioIndependiente.role" required
+                style="width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; background: white;">
+          <option value="admin">Admin (Gerente)</option>
+          <option value="seller">Seller (Vendedor)</option>
+          <option value="customer">Customer (Cliente)</option>
+        </select>
+        
+        <button type="submit" [disabled]="userForm.invalid"
+                style="width: 100%; padding: 12px; background-color: #d35400; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+          Crear Usuario
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- Tabla de Gestión de Usuarios -->
+  <div id="panel-accesos" style="margin-top: 40px;">
+    <h3 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;">Control Global de Accesos</h3>
+    
+    <!-- Panel flotante de edición rápida de contraseña -->
+    <div *ngIf="usuarioEnEdicionPass" style="background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px;">
+      <span style="font-weight: bold; color: #856404;">Nueva contraseña para {{ usuarioEnEdicionPass.email }}:</span>
+      <input type="password" [(ngModel)]="nuevaPasswordEdicion" placeholder="Mínimo 6 caracteres" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex: 1; max-width: 250px;">
+      <button (click)="guardarNuevaPassword()" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Guardar</button>
+      <button (click)="cancelarEdicionPass()" style="background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Cancelar</button>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95rem;">
+      <thead>
+        <tr style="background-color: #f8f9fa; text-align: left;">
+          <th style="padding: 12px; border-bottom: 2px solid #ddd;">ID</th>
+          <th style="padding: 12px; border-bottom: 2px solid #ddd;">Correo</th>
+          <th style="padding: 12px; border-bottom: 2px solid #ddd;">Tienda</th>
+          <th style="padding: 12px; border-bottom: 2px solid #ddd;">Rol (Permisos)</th>
+          <th style="padding: 12px; border-bottom: 2px solid #ddd; text-align: center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of usuarios" style="border-bottom: 1px solid #eee;">
+          <td style="padding: 12px; color: #888;">#{{ u.id }}</td>
+          <td style="padding: 12px; font-weight: 500;">{{ u.email }}</td>
+          <td style="padding: 12px;">
+            <span style="background: #e0f2f1; color: #00796b; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">
+              Store {{ u.storeId || 'N/A' }}
+            </span>
+          </td>
+          <td style="padding: 12px;">
+            <select [value]="u.role" (change)="cambiarRol(u, $event)"
+                    style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; outline: none;">
+              <option value="super-admin">Super Admin</option>
+              <option value="admin">Admin (Gerente)</option>
+              <option value="seller">Seller (Vendedor)</option>
+              <option value="customer">Customer (Cliente)</option>
+            </select>
+          </td>
+          <td style="padding: 12px; text-align: center;">
+            <button (click)="iniciarEdicionPass(u)" style="background: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold;">
+              Editar Pass
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Bandeja de Prospectos con Filtros -->
+<div id="panel-prospectos" style="max-width: 1000px; margin: 40px auto 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+  <h3 style="color: #e67e22; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0; margin-bottom: 15px;">Solicitudes de Nuevos Vendedores (Prospectos)</h3>
+  
+  <!-- Barra de Filtros -->
+  <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: flex-end; background: #fdfbf7; padding: 15px; border-radius: 8px; border: 1px solid #e3e0d8;">
+    
+    <div style="flex: 1; min-width: 200px;">
+      <label style="display: block; font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 5px;">Búsqueda por texto</label>
+      <input type="text" placeholder="Empresa, contacto o correo..." [(ngModel)]="terminoBusquedaProspectos" 
+             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; outline: none;">
+    </div>
+
+    <div style="flex: 1; min-width: 150px;">
+      <label style="display: block; font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 5px;">Filtrar por Estado</label>
+      <select [(ngModel)]="filtroEstadoProspecto" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; outline: none; background: white;">
+        <option value="">Todos los estados</option>
+        <option value="pending">Pendiente</option>
+        <option value="contacted">Contactado</option>
+        <option value="approved">Aprobado</option>
+      </select>
+    </div>
+
+    <div style="flex: 1; min-width: 150px;">
+      <label style="display: block; font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 5px;">Filtrar por Fecha</label>
+      <input type="date" [(ngModel)]="filtroFechaProspecto" 
+             style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; outline: none;">
+    </div>
+
+    <div>
+      <button (click)="limpiarFiltrosProspectos()" 
+              style="padding: 10px 15px; background: #95a5a6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+        Limpiar Filtros
+      </button>
+    </div>
+  </div>
+  
+  <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+    <thead>
+      <tr style="background-color: #fdf6e3; text-align: left;">
+        <th style="padding: 12px; border-bottom: 2px solid #f39c12; color: #d35400;">Empresa</th>
+        <th style="padding: 12px; border-bottom: 2px solid #f39c12; color: #d35400;">Contacto</th>
+        <th style="padding: 12px; border-bottom: 2px solid #f39c12; color: #d35400;">Correo</th>
+        <th style="padding: 12px; border-bottom: 2px solid #f39c12; color: #d35400;">Teléfono</th>
+        <th style="padding: 12px; border-bottom: 2px solid #f39c12; color: #d35400;">Estado</th>
+        <th style="padding: 12px; border-bottom: 2px solid #f39c12; color: #d35400;">Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let prospect of prospectosFiltrados" style="border-bottom: 1px solid #eee;">
+        <td style="padding: 12px; font-weight: bold; color: #2c3e50;">{{ prospect.businessName }}</td>
+        <td style="padding: 12px;">{{ prospect.contactName || 'N/A' }}</td>
+        <td style="padding: 12px;">{{ prospect.email }}</td>
+        <td style="padding: 12px;">{{ prospect.phone || 'N/A' }}</td>
+        <td style="padding: 12px;">
+          <select [value]="prospect.status || 'pending'" (change)="cambiarEstadoProspecto(prospect, $event)"
+                  [ngStyle]="{'background-color': prospect.status === 'approved' ? '#d4edda' : (prospect.status === 'contacted' ? '#fff3cd' : '#f8d7da')}"
+                  style="padding: 6px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; outline: none; font-size: 0.85rem;">
+            <option value="pending">Pendiente</option>
+            <option value="contacted">Contactado</option>
+            <option value="approved">Aprobado</option>
+          </select>
+        </td>
+        <td style="padding: 12px; color: #7f8c8d; font-size: 0.9rem;">{{ prospect.createdAt | date:'short' }}</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div *ngIf="prospectosFiltrados.length === 0" style="padding: 20px; text-align: center; color: #999; font-style: italic;">
+    No se encontraron solicitudes que coincidan con los filtros aplicados.
+  </div>
+</div>

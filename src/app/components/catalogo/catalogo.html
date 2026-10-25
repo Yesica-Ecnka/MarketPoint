@@ -1,0 +1,77 @@
+<div style="max-width: 1400px; margin: 40px auto; padding: 0 20px; font-family: sans-serif;">
+  <h1 style="color: #2c3e50; margin-bottom: 30px; font-size: 1.8rem; border-bottom: 2px solid #eee; padding-bottom: 10px;">Catálogo de Productos</h1>
+
+  <div *ngIf="cargando" style="text-align: center; color: #666; font-size: 1.2rem; padding: 40px;">
+    Cargando productos...
+  </div>
+
+  <div *ngIf="!cargando && productos.length === 0" style="text-align: center; color: #666; padding: 40px; background: #f9f9f9; border-radius: 8px;">
+    No hay productos disponibles en este momento.
+  </div>
+
+  <!-- Layout de Cuadrícula: Productos a la izquierda, Filtros a la derecha -->
+  <div *ngIf="!cargando && productos.length > 0" style="display: grid; grid-template-columns: 1fr 280px; gap: 40px; align-items: start;">
+    
+    <!-- Columna Izquierda: Grid de Productos -->
+    <div>
+      <div *ngIf="productosFiltrados.length > 0" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
+        <div *ngFor="let producto of productosFiltrados" style="border: 1px solid #e0e0e0; border-radius: 10px; padding: 20px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+              <h3 style="margin: 0; color: #333; font-size: 1.1rem;">{{ producto.name }}</h3>
+              <span style="background: #e3f2fd; color: #1565c0; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; font-weight: bold;">
+                {{ producto.category || 'General' }}
+              </span>
+            </div>
+            <p style="color: #666; font-size: 0.9rem; margin: 10px 0; line-height: 1.4;">{{ producto.description || 'Sin descripción' }}</p>
+          </div>
+
+          <div>
+            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 1.2rem; font-weight: bold; color: #28a745;">Q{{ producto.price | number:'1.2-2' }}</span>
+              <span style="font-size: 0.8rem; color: #888; background: #f0f0f0; padding: 4px 8px; border-radius: 4px;">Stock: {{ producto.stock }}</span>
+            </div>
+            
+            <div style="margin-top: 10px; font-size: 0.85rem; color: #555;">
+              Vendido por: <strong>Tienda #{{ producto.storeId }}</strong> 
+            </div>
+
+            <button (click)="agregarAlCarrito(producto)" style="margin-top: 15px; width: 100%; padding: 10px; background-color: #0056b3; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+              Añadir al Carrito
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="productosFiltrados.length === 0" style="padding: 40px; text-align: center; color: #7f8c8d; background: #f9f9f9; border-radius: 8px;">
+        No encontramos ningún producto que coincida con tu búsqueda.
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Panel de Filtros -->
+    <div style="padding: 20px; border: 1px solid #e0e0e0; border-radius: 12px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position: sticky; top: 20px;">
+      <h3 style="margin-top: 0; color: #34495e; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">Filtros de Búsqueda</h3>
+      
+      <label style="font-size: 0.9rem; font-weight: bold; display: block; margin-bottom: 8px; color: #2c3e50;">Buscar por nombre:</label>
+      <input type="text" [(ngModel)]="terminoBusqueda" placeholder="🔍 Ej. Laptop..." style="width: 100%; padding: 10px; margin-bottom: 25px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem;">
+      
+      <label style="font-size: 0.9rem; font-weight: bold; display: block; margin-bottom: 10px; color: #2c3e50;">Categoría:</label>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <label *ngFor="let cat of categoriasDisponibles" style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: #34495e;">
+          <input type="radio" name="filtroCat" [(ngModel)]="categoriaFiltro" [value]="cat" style="transform: scale(1.1);">
+          {{ cat }}
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Burbuja Flotante del Carrito -->
+<button (click)="irAlCarrito()" 
+        style="position: fixed; bottom: 40px; right: 40px; width: 65px; height: 65px; background-color: #f39c12; color: white; border: none; border-radius: 50%; box-shadow: 0 6px 15px rgba(0,0,0,0.2); cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; z-index: 1000; transition: transform 0.2s;">
+  🛒
+  <span *ngIf="cantidadCarrito > 0" 
+        style="position: absolute; top: -5px; right: -5px; background-color: #e74c3c; color: white; border-radius: 50%; min-width: 24px; height: 24px; padding: 0 6px; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; font-weight: bold; border: 2px solid white; box-sizing: border-box;">
+    {{ cantidadCarrito }}
+  </span>
+</button>

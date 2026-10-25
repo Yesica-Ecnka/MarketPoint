@@ -1,0 +1,64 @@
+<div style="max-width: 600px; margin: 40px auto; padding: 30px; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); font-family: sans-serif;">
+  
+  <div style="text-align: center; margin-bottom: 25px;">
+    <h2 style="color: #2c3e50; margin-bottom: 10px;">Vende con Nosotros</h2>
+    <p style="color: #7f8c8d; font-size: 0.95rem;">Únete a MarketPoint y expande tu negocio. Déjanos tus datos y te contactaremos para habilitar tu tienda en nuestra plataforma.</p>
+  </div>
+
+  <div *ngIf="mensaje" [ngStyle]="{'background': exito ? '#e8f5e9' : '#ffebee', 'color': exito ? '#2e7d32' : '#c62828'}" style="padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: bold; text-align: center;">
+    {{ mensaje }}
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 15px;">
+    
+    <div>
+      <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Nombre de tu Empresa *</label>
+      <input type="text" [(ngModel)]="solicitud.nombreEmpresa" placeholder="Ej. TechStore S.A." 
+             style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+    </div>
+
+    <div>
+      <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Nombre de la Persona de Contacto *</label>
+      <input type="text" [(ngModel)]="solicitud.nombreContacto" placeholder="Ej. Juan Pérez" 
+             style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+    </div>
+
+    <div>
+      <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Correo Electrónico de Contacto *</label>
+      <input type="email" [(ngModel)]="solicitud.correo" placeholder="juan@ejemplo.com" 
+             style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+    </div>
+
+    <div style="display: flex; gap: 15px;">
+      <div style="flex: 1;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Teléfono (Opcional)</label>
+        <input type="text" [(ngModel)]="solicitud.telefono" placeholder="+502 1234 5678" 
+               style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+      </div>
+      
+      <div style="flex: 1;">
+        <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Categoría Principal</label>
+        <select [(ngModel)]="solicitud.categoria" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; background: white;">
+          <option value="">Selecciona una opción...</option>
+          <option value="Tecnologia">Tecnología</option>
+          <option value="Ropa">Ropa y Accesorios</option>
+          <option value="Alimentos">Alimentos y Bebidas</option>
+          <option value="Hogar">Hogar y Jardín</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #34495e;">Comentarios Adicionales (Opcional)</label>
+      <textarea [(ngModel)]="solicitud.comentarios" rows="3" placeholder="Háblanos un poco sobre los productos que deseas vender..." 
+                style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; resize: vertical;"></textarea>
+    </div>
+
+    <button type="button" (click)="enviarSolicitud()" [disabled]="enviando"
+            style="margin-top: 10px; width: 100%; padding: 14px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: background 0.3s;">
+      {{ enviando ? 'Enviando...' : 'Enviar Solicitud' }}
+    </button>
+  </div>
+
+</div>
